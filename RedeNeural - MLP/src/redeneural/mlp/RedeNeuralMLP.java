@@ -1,10 +1,13 @@
 package redeneural.mlp;
 
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import operacoes.RedeNeural;
+import operacoes.TrataDados;
 
 public class RedeNeuralMLP extends Application {
     
@@ -18,7 +21,13 @@ public class RedeNeuralMLP extends Application {
         stage.show();
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    public static void main(String[] args) throws IOException {
+        //launch(args);
+        
+        
+        
+        RedeNeural rede = new RedeNeural(TrataDados.leDados("C:\\base.csv"), 0, "", 0, 0, 5);
+        rede.treinar();
+        
     }
 }
