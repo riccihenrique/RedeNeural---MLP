@@ -91,8 +91,9 @@ public class NormalizaDados {
         }
         csvReader.close();
         
-        listas.add(Lt);
         listas.add(LD);
+        listas.add(Lt);
+       
         
         return listas;
     }
