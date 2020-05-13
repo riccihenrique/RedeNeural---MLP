@@ -14,32 +14,39 @@ import java.util.Random;
  * @author Alexandre
  */
 public class Neuronio {
+       
+    private double net, erro, i;
 
-       private int entrada;
-       private double net, erro, i;
-       private List<Double> pesos;
-
-    public Neuronio(int qtdpesos) {
-        pesos = new ArrayList<>();
-        Random rand = new Random();
-        
-        
-        for (int i = 0; i < qtdpesos; i++) {
-            Double peso = rand.nextInt(5)-2.0;            
-            this.pesos.add(peso); 
-        }
-        
+    public Neuronio() {
     }
 
-    
-    public String pesos()
-    {
-        String s="";
-        
-        for (Double d: pesos)
-          s+=d+" ";  
-        
-        return s;
+    public double getNet() {
+        return net;
+    }
+
+    public void setNet(double net) {
+        this.net = net;
+    }
+
+    public double getErro() {
+        return erro;
+    }
+
+    public void setErro(double erro) {
+        this.erro = erro;
+    }
+
+    public double getI() {
+        return i;
+    }
+
+    public void setI(double i) {
+        this.i = i;
     }
        
+       
+    
+
+    
+          
 }

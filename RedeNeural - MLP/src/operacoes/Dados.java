@@ -24,9 +24,6 @@ public class Dados {
     public Dados() {
     }
     
-    
-    
-    
 
     public List<Double> getAtributos() {
         return atributos;
@@ -48,6 +45,9 @@ public class Dados {
     {
         atributos.add(d);
     }
+    
+  
+    
    
     
     

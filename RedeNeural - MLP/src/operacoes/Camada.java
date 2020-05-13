@@ -13,17 +13,12 @@ public class Camada {
        
         for (int j = 0; j < qtdNeuronios; j++) 
         {               
-                Neuronio  n = new Neuronio(j==0?qtdCamadaAnt:qtdNeuronios); 
+                Neuronio  n = new Neuronio(); 
                 Lneuronio.add(n);
         }
-        
     }
 
     public List<Neuronio> getLneuronio() {
         return Lneuronio;
     }
-    
-    
-    
-    
 }
