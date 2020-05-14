@@ -26,13 +26,13 @@ public class RedeNeuralMLP extends Application {
     public static void main(String[] args) throws IOException {
         //launch(args);
       
-        List<Object> dados = NormalizaDados.leDados("/home/henrique/Documentos/RedeNeural---MLP/RedeNeural - MLP/src/base_treinamento.csv", "/home/henrique/Documentos/RedeNeural---MLP/RedeNeural - MLP/src/base_teste.csv");
+        List<Object> dados = NormalizaDados.leDados("C:/base_treinamento.csv", "C:/base_teste.csv");
         
         String rotulos = (String)dados.get(0);
         List<Dados> LDados = (List<Dados>)dados.get(1);
         List<Dados> LTestes = (List<Dados>)dados.get(2);
 
-        RedeNeural rede = new RedeNeural(LDados, 0, "lo", "lo", 0.2, 3000, 5);
+        RedeNeural rede = new RedeNeural(LDados, 0, "li", "li", 0.2, 2000, 7);
         rede.treinar();
         rede.teste(LTestes);
         

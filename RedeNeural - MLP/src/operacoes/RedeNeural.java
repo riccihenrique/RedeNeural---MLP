@@ -92,27 +92,27 @@ public class RedeNeural {
     }
 
     public double linear(Double net) {
-        return net / 10;
+        return net / 10.0;
     }
 
     public double Dlinear(Double net) {
-        return 1 / 10;
+        return 1.0 / 10.0;
     }
 
     public double logistica(Double net) {
-        return 1 / (1 + Math.pow(Math.E, -net));
+        return 1.0 / (1.0 + Math.pow(Math.E, -net));
     }
 
     public double Dlogistica(Double net) {
-        return net * (1 - net);
+        return net * (1.0 - net);
     }
 
     public double hiperbolica(Double net) {
-        return (1 - Math.pow(Math.E, -2 * net)) / (1 + Math.pow(Math.E, -2 * net));
+        return (1.0 - Math.pow(Math.E, -2.0 * net)) / (1.0 + Math.pow(Math.E, -2.0 * net));
     }
 
     public double Dhiperbolica(Double net) {
-        return 1 - net * net;
+        return 1.0 - net * net;
     }
 
     public void treinar() {
@@ -161,9 +161,9 @@ public class RedeNeural {
                     erroRede += Math.pow(Lsaida.get(i).getErro(), 2);
 
                     if (faOculta.equals("t")) {
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dhiperbolica(Lsaida.get(i).getNet()));
+                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dhiperbolica(Lsaida.get(i).getI()));
                     } else if (faOculta.equals("lo")) {
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlogistica(Lsaida.get(i).getNet()));
+                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlogistica(Lsaida.get(i).getI()));
                     } else {
                         Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlinear(Lsaida.get(i).getNet()));
                     }
@@ -183,9 +183,9 @@ public class RedeNeural {
                     }
 
                     if (faOculta.equals("t")) {
-                        Lco.get(i).setErro(somErro * Dhiperbolica(Lco.get(i).getNet()));
+                        Lco.get(i).setErro(somErro * Dhiperbolica(Lco.get(i).getI()));
                     } else if (faOculta.equals("lo")) {
-                        Lco.get(i).setErro(somErro * Dlogistica(Lco.get(i).getNet()));
+                        Lco.get(i).setErro(somErro * Dlogistica(Lco.get(i).getI()));
                     } else {
                         Lco.get(i).setErro(somErro * Dlinear(Lco.get(i).getNet()));
                     }
@@ -194,14 +194,14 @@ public class RedeNeural {
                 //Atualização de pesos da camada de saida
                 for (int i = 0; i < Lsaida.size(); i++) {
                     for (int j = 0; j < Lco.size(); j++) {
-                        pesosSaida[i][j] = pesosSaida[i][j] + txA * Lsaida.get(i).getErro() * Lco.get(j).getI();
+                        pesosSaida[i][j] = pesosSaida[i][j] + txA * Lsaida.get(i).getGradiente() * Lco.get(j).getI();
                     }
                 }
 
                 //Atualização de pesos da camada oculta
                 for (int i = 0; i < Lco.size(); i++) {
                     for (int j = 0; j < d.getAtributos().size(); j++) {
-                        pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getErro() * d.getAtributos().get(j);
+                        pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getGradiente() * d.getAtributos().get(j);
                     }
                 }
             }
