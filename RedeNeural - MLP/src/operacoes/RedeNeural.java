@@ -1,20 +1,17 @@
 package operacoes;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class RedeNeural {
-    
+
     private List<Dados> Ldados;
     private List<Neuronio> Lco, Lsaida;
     private List<Double> Lerros = new ArrayList<>();
-    
-    
-    private double [][] pesosOculta, pesosSaida;
-    private int [][] mDesejada;
+
+    private double[][] pesosOculta, pesosSaida;
+    private int[][] mDesejada;
     private double erro, erroRede = 10, txA;
     private String faOculta, faSaida;
     private int qtIt, qtCo;
@@ -29,257 +26,245 @@ public class RedeNeural {
         this.qtIt = qtIt;
         this.qtCo = qtCo;
         inicializaCamadas();
-    }  
-        
-    private int getQtSaida()
-    {   
+    }
+
+    private int getQtSaida() {
         rotulos = new ArrayList();
-        
-        for(int i=0; i<Ldados.size(); i++)
-        {
-           if(!rotulos.contains(Ldados.get(i).getClasse()))
-               rotulos.add(Ldados.get(i).getClasse());
+
+        for (int i = 0; i < Ldados.size(); i++) {
+            if (!rotulos.contains(Ldados.get(i).getClasse())) {
+                rotulos.add(Ldados.get(i).getClasse());
+            }
         }
-        
+
         return rotulos.size();
     }
-    
-    
-    public void inicializaCO()
-    {
+
+    public void inicializaCO() {
         //init camada oculta
-        Lco = new ArrayList<>();        
-        for (int i = 0; i < qtCo; i++) 
-            Lco.add(new Neuronio()); 
+        Lco = new ArrayList<>();
+        for (int i = 0; i < qtCo; i++) {
+            Lco.add(new Neuronio());
+        }
     }
-    
-    public void inicializaSaida()
-    {
+
+    public void inicializaSaida() {
         //init camada de saida
-        Lsaida = new ArrayList<>();        
-        for (int i = 0; i < getQtSaida(); i++) 
-            Lsaida.add(new Neuronio()); 
+        Lsaida = new ArrayList<>();
+        for (int i = 0; i < getQtSaida(); i++) {
+            Lsaida.add(new Neuronio());
+        }
     }
-    
-    
-    public void inicializaCamadas()
-    {
+
+    public void inicializaCamadas() {
         inicializaCO();
         inicializaSaida();
-        
-        
+
         pesosOculta = new double[qtCo][Ldados.get(0).getAtributos().size()];
         pesosSaida = new double[getQtSaida()][qtCo];
         mDesejada = new int[getQtSaida()][getQtSaida()];
-             
+
         Random rand = new Random();
         for (int i = 0; i < qtCo; i++) {
             for (int j = 0; j < Ldados.get(0).getAtributos().size(); j++) {
-                pesosOculta[i][j] = rand.nextInt(5)-2.0;
+                pesosOculta[i][j] = rand.nextInt(5) - 2.0;
             }
         }
-        
+
         for (int i = 0; i < getQtSaida(); i++) {
             for (int j = 0; j < qtCo; j++) {
-                pesosSaida[i][j] = rand.nextInt(5)-2.0;
+                pesosSaida[i][j] = rand.nextInt(5) - 2.0;
             }
-        }      
-        
-        for (int i = 0; i < getQtSaida(); i++)
-        {        
-            mDesejada[i][i] = 1;
+        }
+
+        for (int i = 0; i < getQtSaida(); i++) {
             for (int j = 0; j < getQtSaida(); j++) {
-                
-                if(i!=j && faOculta.equals("t"))
+
+                if (i == j) {
+                    mDesejada[i][i] = 1;
+                } else if (faOculta.equals("t")) {
                     mDesejada[i][j] = -1;
-                else
-                     mDesejada[i][j] = 0;
+                } else {
+                    mDesejada[i][j] = 0;
+                }
             }
         }
     }
-    
-    
-    
-    
-    public double linear(Double net)
-    {      
-        return net/10;
-    }  
-    public double Dlinear(Double net)
-    {
-        return 1/10;
+
+    public double linear(Double net) {
+        return net / 10;
     }
-    public double logistica(Double net)
-    {       
-        return 1/(1+Math.pow(Math.E, -net));
+
+    public double Dlinear(Double net) {
+        return 1 / 10;
     }
-    public double Dlogistica(Double net)
-    {       
-        return net*(1-net);
+
+    public double logistica(Double net) {
+        return 1 / (1 + Math.pow(Math.E, -net));
     }
-    public double hiperbolica(Double net)
-    {
-        return (1-Math.pow(Math.E, -2*net))/(1+Math.pow(Math.E, -2*net));
+
+    public double Dlogistica(Double net) {
+        return net * (1 - net);
     }
-    public double Dhiperbolica(Double net)
-    {
-        return 1-net*net;
+
+    public double hiperbolica(Double net) {
+        return (1 - Math.pow(Math.E, -2 * net)) / (1 + Math.pow(Math.E, -2 * net));
     }
-    
-    
-    public void treinar()
-    {
-        int epocas = 0;        
-        while(erro < erroRede && epocas < qtIt)
-        {
-            for (Dados d:Ldados)
-            {   
-                for (int i = 0; i < Lco.size(); i++) 
+
+    public double Dhiperbolica(Double net) {
+        return 1 - net * net;
+    }
+
+    public void treinar() {
+        int epocas = 0;
+        while (erro < erroRede && epocas < qtIt) {
+            for (Dados d : Ldados) {
+                for (int i = 0; i < Lco.size(); i++) // Cálculo do NET
                 {
                     double soma = 0;
-                    for (int j = 0; j < d.getAtributos().size(); j++) 
-                    {
-                       soma+= d.getAtributos().get(j)*pesosOculta[i][j];                       
-                    }                    
+                    for (int j = 0; j < d.getAtributos().size(); j++) {
+                        soma += d.getAtributos().get(j) * pesosOculta[i][j];
+                    }
                     Lco.get(i).setNet(soma);
-                    
-                    if(faOculta.equals("t")) //tg hiperbolica
-                        Lco.get(i).setI(hiperbolica(Lco.get(i).getNet()));
-                    else  if(faOculta.equals("lo")) 
-                        Lco.get(i).setI(logistica(Lco.get(i).getNet()));
-                    else 
-                        Lco.get(i).setI(linear(Lco.get(i).getNet()));
-                }
-                
-                
-                for (int i = 0; i < Lsaida.size(); i++) 
-                {
-                    double soma = 0;
-                    for (int j = 0; j < Lco.size(); j++) 
+
+                    if (faOculta.equals("t")) //tg hiperbolica
                     {
-                        soma+= Lco.get(j).getI()*pesosSaida[i][j];                                            
-                    }     
-                    Lsaida.get(i).setNet(soma);  
-                    
-                    if(faSaida.equals("t")) //tg hiperbolica
+                        Lco.get(i).setI(hiperbolica(Lco.get(i).getNet()));
+                    } else if (faOculta.equals("lo")) {
+                        Lco.get(i).setI(logistica(Lco.get(i).getNet()));
+                    } else {
+                        Lco.get(i).setI(linear(Lco.get(i).getNet()));
+                    }
+                }
+
+                for (int i = 0; i < Lsaida.size(); i++) {
+                    double soma = 0;
+                    for (int j = 0; j < Lco.size(); j++) {
+                        soma += Lco.get(j).getI() * pesosSaida[i][j];
+                    }
+                    Lsaida.get(i).setNet(soma);
+
+                    if (faSaida.equals("t")) //tg hiperbolica
+                    {
                         Lsaida.get(i).setI(hiperbolica(Lsaida.get(i).getNet()));
-                    else  if(faSaida.equals("lo")) 
+                    } else if (faSaida.equals("lo")) {
                         Lsaida.get(i).setI(logistica(Lsaida.get(i).getNet()));
-                    else 
+                    } else {
                         Lsaida.get(i).setI(linear(Lsaida.get(i).getNet()));
+                    }
                 }
-               
-                erroRede = 0;      
+
+                erroRede = 0;
                 int index = rotulos.indexOf(d.getClasse());
-                for (int i = 0; i < Lsaida.size(); i++) 
-                {
-                    Lsaida.get(i).setErro(mDesejada[index][i]-Lsaida.get(i).getI());
-                    erroRede += Math.pow(Lsaida.get(i).getErro(),2);
-                    
-                    if(faOculta.equals("t"))
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro()*Dhiperbolica(Lsaida.get(i).getI()));
-                    else if(faOculta.equals("lo"))
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro()*Dlogistica(Lsaida.get(i).getI()));
-                    else
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro()*Dlinear(Lsaida.get(i).getI()));                    
+                for (int i = 0; i < Lsaida.size(); i++) {
+                    Lsaida.get(i).setErro(mDesejada[index][i] - Lsaida.get(i).getI());
+                    erroRede += Math.pow(Lsaida.get(i).getErro(), 2);
+
+                    if (faOculta.equals("t")) {
+                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dhiperbolica(Lsaida.get(i).getNet()));
+                    } else if (faOculta.equals("lo")) {
+                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlogistica(Lsaida.get(i).getNet()));
+                    } else {
+                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlinear(Lsaida.get(i).getNet()));
+                    }
                 }
-                
-                erroRede/=2;
+
+                erroRede /= 2;
                 Lerros.add(erroRede);
-                
+
+                if (erroRede < erro) {
+                    break;
+                }
+
                 for (int i = 0; i < Lco.size(); i++) {
                     double somErro = 0;
                     for (int j = 0; j < Lsaida.size(); j++) {
-                        somErro+= Lsaida.get(j).getGradiente()*pesosSaida[j][i];
+                        somErro += Lsaida.get(j).getGradiente() * pesosSaida[j][i];
                     }
-                    
-                     if(faOculta.equals("t"))
-                        Lco.get(i).setErro(somErro*Dhiperbolica(Lco.get(i).getI()));
-                    else if(faOculta.equals("lo"))
-                        Lco.get(i).setErro(somErro*Dlogistica(Lco.get(i).getI()));
-                    else
-                        Lco.get(i).setErro(somErro*Dlinear(Lco.get(i).getI())); 
+
+                    if (faOculta.equals("t")) {
+                        Lco.get(i).setErro(somErro * Dhiperbolica(Lco.get(i).getNet()));
+                    } else if (faOculta.equals("lo")) {
+                        Lco.get(i).setErro(somErro * Dlogistica(Lco.get(i).getNet()));
+                    } else {
+                        Lco.get(i).setErro(somErro * Dlinear(Lco.get(i).getNet()));
+                    }
                 }
-                
+
                 //Atualização de pesos da camada de saida
-                for (int i = 0; i < Lsaida.size(); i++) 
-                {
-                    for (int j = 0; j < Lco.size(); j++) 
-                    {
-                       pesosSaida[i][j] = pesosSaida[i][j] +  txA * Lsaida.get(i).getErro() * Lco.get(j).getI();
-                    }  
-                }
-                
-                //Atualização de pesos da camada oculta
-                for (int i = 0; i < Lco.size(); i++) 
-                {
-                    for (int j = 0; j < d.getAtributos().size(); j++) 
-                    {
-                       pesosOculta[i][j] = pesosOculta[i][j] +  txA * Lco.get(i).getErro() * d.getAtributos().get(j);
+                for (int i = 0; i < Lsaida.size(); i++) {
+                    for (int j = 0; j < Lco.size(); j++) {
+                        pesosSaida[i][j] = pesosSaida[i][j] + txA * Lsaida.get(i).getErro() * Lco.get(j).getI();
                     }
                 }
-                
-                if(erroRede < erro)
-                    break;
+
+                //Atualização de pesos da camada oculta
+                for (int i = 0; i < Lco.size(); i++) {
+                    for (int j = 0; j < d.getAtributos().size(); j++) {
+                        pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getErro() * d.getAtributos().get(j);
+                    }
+                }
             }
-           
-            
-            
-            System.out.println("Epoca: "+epocas+ "Erro:"+ erroRede*1000);
-            epocas ++;
+
+            System.out.println("Epoca: " + epocas + " Erro:" + erroRede);
+            epocas++;
         }
     }
-    
-    public void teste(List<Dados> Lteste)
-    {
-            for (Dados d:Lteste)
-            {   
-                for (int i = 0; i < Lco.size(); i++) 
-                {
-                    for (int j = 0; j < d.getAtributos().size(); j++) 
-                    {
-                       Lco.get(i).setNet(Lco.get(i).getNet()+d.getAtributos().get(j)*pesosOculta[i][j]);
-                    }
-                    
-                    if(faOculta.equals("t")) //tg hiperbolica
-                        Lco.get(i).setI(hiperbolica(Lco.get(i).getNet()));
-                    else  if(faOculta.equals("lo")) 
-                        Lco.get(i).setI(logistica(Lco.get(i).getNet()));
-                    else 
-                        Lco.get(i).setI(linear(Lco.get(i).getNet()));
+
+    public void teste(List<Dados> Lteste) {
+        int cA = 0, tot = 0;
+        for (Dados d : Lteste) {
+            for (int i = 0; i < Lco.size(); i++) // Cálculo do NET
+            {
+                double soma = 0;
+                for (int j = 0; j < d.getAtributos().size(); j++) {
+                    soma += d.getAtributos().get(j) * pesosOculta[i][j];
                 }
-                
-                
-                for (int i = 0; i < Lsaida.size(); i++) 
+                Lco.get(i).setNet(soma);
+
+                if (faOculta.equals("t")) //tg hiperbolica
                 {
-                    for (int j = 0; j < Lco.size(); j++) 
-                    {
-                       Lsaida.get(i).setNet(Lsaida.get(i).getNet()+Lco.get(j).getI()*pesosSaida[i][j]);                       
-                    }                    
-                    
-                    if(faSaida.equals("t")) //tg hiperbolica
-                        Lsaida.get(i).setI(hiperbolica(Lsaida.get(i).getNet()));
-                    else  if(faSaida.equals("lo")) 
-                        Lsaida.get(i).setI(logistica(Lsaida.get(i).getNet()));
-                    else 
-                        Lsaida.get(i).setI(linear(Lsaida.get(i).getNet()));
+                    Lco.get(i).setI(hiperbolica(Lco.get(i).getNet()));
+                } else if (faOculta.equals("lo")) {
+                    Lco.get(i).setI(logistica(Lco.get(i).getNet()));
+                } else {
+                    Lco.get(i).setI(linear(Lco.get(i).getNet()));
                 }
-               
-                      
-                int index = 0;
-                double maior = Lsaida.get(0).getI();
-                
-                for (int i = 1; i < Lsaida.size(); i++) 
-                {
-                    if(Lsaida.get(i).getI() > maior)
-                    {
-                        maior = Lsaida.get(i).getI();
-                        index = i;
-                    }                        
-                }
-                
-                System.out.println("Esperado:"+d.getClasse()+" Obtido:"+rotulos.get(index));
             }
+
+            for (int i = 0; i < Lsaida.size(); i++) {
+                double soma = 0;
+                for (int j = 0; j < Lco.size(); j++) {
+                    soma += Lco.get(j).getI() * pesosSaida[i][j];
+                }
+                Lsaida.get(i).setNet(soma);
+
+                if (faSaida.equals("t")) //tg hiperbolica
+                {
+                    Lsaida.get(i).setI(hiperbolica(Lsaida.get(i).getNet()));
+                } else if (faSaida.equals("lo")) {
+                    Lsaida.get(i).setI(logistica(Lsaida.get(i).getNet()));
+                } else {
+                    Lsaida.get(i).setI(linear(Lsaida.get(i).getNet()));
+                }
+            }
+
+            int index = 0;
+            double maior = Lsaida.get(0).getI();
+
+            for (int i = 1; i < Lsaida.size(); i++) {
+                if (Lsaida.get(i).getI() > maior) {
+                    maior = Lsaida.get(i).getI();
+                    index = i;
+                }
+            }
+
+            System.out.println("Esperado:" + d.getClasse() + " Obtido:" + rotulos.get(index));
+            tot++;
+            if (d.getClasse().equals(rotulos.get(index))) {
+                cA++;
+            }
+        }
+        System.out.println("Acertados " + cA + " de " + tot);
     }
-    
 }
