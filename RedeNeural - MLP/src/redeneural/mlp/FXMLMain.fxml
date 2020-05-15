@@ -1,14 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXRadioButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="200" prefWidth="320" xmlns:fx="http://javafx.com/fxml/1" fx:controller="redeneural.mlp.FXMLMainController">
-    <children>
-        <Button layoutX="126" layoutY="90" text="Click Me!" onAction="#handleButtonAction" fx:id="button" />
-        <Label layoutX="126" layoutY="120" minHeight="16" minWidth="69" fx:id="label" />
-    </children>
-</AnchorPane>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="465.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="redeneural.mlp.FXMLMainController">
+   <children>
+      <HBox fx:id="hboxItens" alignment="CENTER" disable="true" prefHeight="291.0" prefWidth="600.0" spacing="10.0">
+         <children>
+            <VBox prefHeight="245.0" prefWidth="275.0" spacing="15.0">
+               <children>
+                  <Label alignment="TOP_LEFT" contentDisplay="TOP" text="Camadas da Rede">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
+                  <JFXTextField fx:id="txtInputLayer" editable="false" labelFloat="true" promptText="Entrada" />
+                  <JFXTextField fx:id="txtOutputLayer" editable="false" labelFloat="true" promptText="Saída" />
+                  <JFXTextField fx:id="txtHiddenLayer" labelFloat="true" promptText="Oculta" />
+                  <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="6.0">
+                     <children>
+                        <Label text="Ativaçao Camada Oculta">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXRadioButton fx:id="linearHidden" selected="true" text="Linear">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="oculta" />
+                           </toggleGroup>
+                        </JFXRadioButton>
+                        <JFXRadioButton fx:id="logisticaHidden" text="Logistica" toggleGroup="$oculta" />
+                        <JFXRadioButton fx:id="tanhHidden" text="Tangente Hiperbolica" toggleGroup="$oculta" />
+                     </children>
+                  </VBox>
+               </children>
+               <HBox.margin>
+                  <Insets top="15.0" />
+               </HBox.margin>
+            </VBox>
+            <VBox prefHeight="245.0" prefWidth="255.0" spacing="15.0">
+               <children>
+                  <Label alignment="TOP_LEFT" contentDisplay="TOP" text="Parametros da Rede">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
+                  <JFXTextField fx:id="txtLearningRate" editable="false" labelFloat="true" promptText="Taxa de Aprendizado" text="0.2" />
+                  <JFXTextField fx:id="txtMinError" editable="false" labelFloat="true" promptText="Erro mínimo" text="0.00001" />
+                  <JFXTextField fx:id="txtSteps" labelFloat="true" promptText="Épocas" text="2000" />
+                  <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="6.0">
+                     <children>
+                        <Label text="Ativaçao Camada Saida">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXRadioButton fx:id="linear" selected="true" text="Linear">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="saida" />
+                           </toggleGroup>
+                        </JFXRadioButton>
+                        <JFXRadioButton fx:id="logistica" text="Logistica" toggleGroup="$saida" />
+                        <JFXRadioButton fx:id="tanh" text="Tangente Hiperbolica" toggleGroup="$saida" />
+                     </children>
+                  </VBox>
+               </children>
+               <HBox.margin>
+                  <Insets top="15.0" />
+               </HBox.margin>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="31.0" prefWidth="600.0" spacing="10.0">
+         <children>
+            <JFXButton onAction="#clkLoad" text="Carregar Arquivo" />
+            <JFXButton onAction="#clkModel" text="Carregar Modelo" />
+         </children>
+      </HBox>
+      <TableView fx:id="tableData" prefHeight="143.0" prefWidth="600.0" />
+      <JFXButton fx:id="btTrain" onAction="#cklTrain" text="Treinar" />
+   </children>
+</VBox>

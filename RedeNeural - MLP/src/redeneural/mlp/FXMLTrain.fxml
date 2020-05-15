@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextArea?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<VBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="460.0" prefWidth="450.0" spacing="15.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="redeneural.mlp.FXMLTrainController">
+   <children>
+      <Label fx:id="lbTrain" text="Treinando...">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <JFXTextArea fx:id="taSteps" prefHeight="231.0" prefWidth="450.0" disable="true" />
+      <JFXButton onAction="#clkChart" text="Gŕafico de Erro" />
+      <JFXButton fx:id="btConfusionMatrix" onAction="#clkConfusionMatrix" text="Gerar Matriz de Confusao" visible="false" />
+      <TableView fx:id="tableConfusion" prefHeight="200.0" prefWidth="200.0" visible="false" />
+   </children>
+</VBox>

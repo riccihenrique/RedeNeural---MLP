@@ -1,15 +1,11 @@
 package redeneural.mlp;
 
 import java.io.IOException;
-import java.util.List;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import operacoes.Dados;
-import operacoes.RedeNeural;
-import operacoes.NormalizaDados;
 
 public class RedeNeuralMLP extends Application {
     
@@ -24,19 +20,7 @@ public class RedeNeuralMLP extends Application {
     }
 
     public static void main(String[] args) throws IOException {
-        //launch(args);
-      
-        List<Object> dados = NormalizaDados.leDados("C:/base_treinamento.csv", "C:/base_teste.csv");
-        
-        String rotulos = (String)dados.get(0);
-        List<Dados> LDados = (List<Dados>)dados.get(1);
-        List<Dados> LTestes = (List<Dados>)dados.get(2);
-
-        RedeNeural rede = new RedeNeural(LDados, 0, "li", "li", 0.2, 2000, 7);
-        rede.treinar();
-        rede.teste(LTestes);
-        
+        launch(args);
         System.exit(0);
-        
     }
 }
