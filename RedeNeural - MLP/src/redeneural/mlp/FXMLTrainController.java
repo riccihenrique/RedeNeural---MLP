@@ -1,25 +1,16 @@
 package redeneural.mlp;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXTextArea;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
@@ -27,7 +18,6 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 import operacoes.Dados;
 import operacoes.RedeNeural;
@@ -37,62 +27,39 @@ public class FXMLTrainController implements Initializable {
     @FXML
     private Label lbTrain;
     @FXML
-    private TableView tableConfusion;
-    
-    private RedeNeural net;
-    private List<Dados> lTeste;
+    private TableView tableConfusion;    
     @FXML
     private LineChart<String, Double> chartLoss;
     @FXML
     private CategoryAxis xAxis;
     @FXML
     private PieChart pieChart;
+    
+    private RedeNeural net;
+    private List<Dados> lTeste;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        //new Thread(new Runnable() {
-           // @Override
-           // public void run() {
-//                while(net == null);
-                
-
-
-                try
-                {
-                    Task<Void> exampleTask = new Task<Void>() 
-                            { 
-                                @Override protected Void call() throws Exception 
-                                { // Demais códigos... 
-                                    Platform.runLater(new Runnable() 
-                                    { 
-                                        @Override public void run() 
-                                        { 
-                                            // Alteração de componentes 
-                                            net.treinar();
-                                            clkChart();
-                                            showConfusion(net.teste(lTeste));
-                                        } 
-                                    }); 
-                                    return null;
-                                } 
-                            }; new Thread(exampleTask).start();
-                    
-                }catch(Exception e){System.out.println(e.getMessage());}
-                
-//                
-//                while(!net.isFinished());
-//                
-//                List<Double> errors = net.getErrors();
-//                taSteps.setText("");
-//                for(int i = 0; i < errors.size(); i++) {
-//                    taSteps.setText(taSteps.getText() + "\n" + "Step: " + i + " Loss: " + errors.get(i));
-//                }
-//                
-            //}
-        //}).start();
+        try {
+            Task<Void> exampleTask = new Task<Void>() { 
+                @Override protected Void call() throws Exception { // Demais códigos... 
+                    Platform.runLater(new Runnable() { 
+                        @Override public void run() { // Alteração de componentes 
+                            net.treinar();
+                            clkChart();
+                            showConfusion(net.teste(lTeste));
+                        } 
+                    }); 
+                    return null;
+                } 
+            }; 
+            new Thread(exampleTask).start();
+        }
+        catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
-   
     private void clkChart() {
         xAxis.setLabel("Épocas");
         chartLoss.setTitle("Perdas por Época");
@@ -106,7 +73,6 @@ public class FXMLTrainController implements Initializable {
             series.getData().add(new XYChart.Data<String, Double>(i + "", net.getErrors().get(i)));
     }
 
-    
     public void setNet(RedeNeural net) {
         this.net = net;
     }
@@ -160,7 +126,6 @@ public class FXMLTrainController implements Initializable {
         
                 pieChart.setData(pieChartData); 
                 pieChart.setTitle("Taxa de Acerto");
-        
         
         tableConfusion.setItems(data); // adiciona o observable list de dados na tabela e show de bola       
         tableConfusion.setVisible(true);

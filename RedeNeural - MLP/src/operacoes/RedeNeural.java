@@ -1,10 +1,11 @@
 package operacoes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class RedeNeural {
+public class RedeNeural implements Serializable {
 
     private List<Dados> Ldados;
     private List<Neuronio> Lco, Lsaida;
@@ -109,8 +110,10 @@ public class RedeNeural {
 
     public void treinar() {
         int epocas = 0;
+        int som_erro = 0;
         while (erro < erroRede && epocas < qtIt) {
             for (Dados d : Ldados) {
+                som_erro = 0;
                 for (int i = 0; i < Lco.size(); i++) // Cálculo do NET
                 {
                     double soma = 0;
@@ -156,7 +159,8 @@ public class RedeNeural {
                         Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlinear(Lsaida.get(i).getNet()));
                 }
 
-                erroRede /= 2;                
+                erroRede /= 2;
+                som_erro += erroRede;
 
                 for (int i = 0; i < Lco.size(); i++) {
                     double somErro = 0;
@@ -181,7 +185,8 @@ public class RedeNeural {
                     for (int j = 0; j < d.getAtributos().size(); j++) 
                         pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getGradiente() * d.getAtributos().get(j);
             }
-
+            
+            erroRede = erroRede / Ldados.size();
             System.out.println("Epoca: " + epocas + " Erro:" + erroRede);
             Lerros.add(erroRede);
 
@@ -261,5 +266,4 @@ public class RedeNeural {
     {
         return rotulos;
     }
-    
 }
