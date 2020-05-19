@@ -33,6 +33,7 @@ import operacoes.RedeNeural;
 
 public class FXMLMainController implements Initializable {
 
+    FileChooser fc;    
     @FXML
     private ToggleGroup oculta;
     @FXML
@@ -76,7 +77,7 @@ public class FXMLMainController implements Initializable {
     }
 
     private File readFileTest() {
-        FileChooser fc = new FileChooser();        
+         
         fc.setTitle("Abrir csv de teste");
         File file_teste = fc.showOpenDialog(null);
         return file_teste;
@@ -96,14 +97,17 @@ public class FXMLMainController implements Initializable {
     
     @FXML
     private void clkLoad(ActionEvent event) {
-        FileChooser fc = new FileChooser();
+        fc = new FileChooser();
         fc.setTitle("Abrir csv de treinamento");
-        //File file_train = fc.showOpenDialog(null);       
-        //File file_test = readFileTest();
+        File file_train = fc.showOpenDialog(null);   
+        fc.setTitle("Abrir csv de teste");
         
-//        List<Object> dados = NormalizaDados.leDados(file_train.getAbsolutePath(), file_test.getAbsolutePath());
-        List<Object> dados = NormalizaDados.leDados("/home/henrique/Documentos/RedeNeural---MLP/RedeNeural - MLP/src/base_treinamento.csv",
-                                    "/home/henrique/Documentos/RedeNeural---MLP/RedeNeural - MLP/src/base_teste.csv");
+        fc.setInitialDirectory(new File(file_train.getParent()));
+        File file_test = fc.showOpenDialog(null);
+        
+        List<Object> dados = NormalizaDados.leDados(file_train.getAbsolutePath(), file_test.getAbsolutePath());
+       //List<Object> dados = NormalizaDados.leDados("/home/henrique/Documentos/RedeNeural---MLP/RedeNeural - MLP/src/base_treinamento.csv",
+         //                           "/home/henrique/Documentos/RedeNeural---MLP/RedeNeural - MLP/src/base_teste.csv");
         
         String rotulos = (String)dados.get(0);
         lTreino = (List<Dados>)dados.get(1);

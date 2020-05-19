@@ -193,7 +193,9 @@ public class RedeNeural {
         this.finished = true;
     }
 
-    public void teste(List<Dados> Lteste) {
+    public int[][] teste(List<Dados> Lteste) {
+        
+        int [][] mConfusao = new int[getQtSaida()][getQtSaida()];
         int cA = 0, tot = 0;
         for (Dados d : Lteste) {
             for (int i = 0; i < Lco.size(); i++) // Cálculo do NET
@@ -230,18 +232,21 @@ public class RedeNeural {
             int index = 0;
             double maior = Lsaida.get(0).getI();
 
-            for (int i = 1; i < Lsaida.size(); i++)
+            for (int i = 1; i < Lsaida.size(); i++)                
                 if (Lsaida.get(i).getI() > maior) {
                     maior = Lsaida.get(i).getI();
                     index = i;
                 }
-
-            System.out.println("Esperado:" + d.getClasse() + " Obtido:" + rotulos.get(index));
-            tot++;
-            if (d.getClasse().equals(rotulos.get(index)))
-                cA++;
+            
+            int i = 0;
+            for (; i < rotulos.size(); i++) {
+                if(rotulos.get(i).equals(d.getClasse()))
+                    break;
+            }
+            
+            mConfusao[i][index]++;
         }
-        System.out.println("Acertados " + cA + " de " + tot);
+        return mConfusao;
     }
 
     public boolean isFinished() {
@@ -252,7 +257,9 @@ public class RedeNeural {
         return this.Lerros;
     }
 
-    public int[][] getMatrizConfusao() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<String> getRotulos()
+    {
+        return rotulos;
     }
+    
 }
