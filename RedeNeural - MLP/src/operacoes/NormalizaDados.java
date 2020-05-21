@@ -55,7 +55,7 @@ public class NormalizaDados {
 
             for (Dados d : LD) {
                 for (int i = 0; i < d.getAtributos().size(); i++) {
-                    Double newValor = (d.getAtributos().get(i) - menor[i]) / (maior[i] - menor[i]);
+                    Double newValor = ((double) d.getAtributos().get(i) - menor[i]) / (maior[i] - menor[i]);
 
                     d.getAtributos().set(i, newValor);
                 }
@@ -69,7 +69,7 @@ public class NormalizaDados {
 
                 for (int i = 0; i < data.length - 1; i++) {
 
-                    Double newValor = (Double.parseDouble(data[i]) - menor[i]) / (maior[i] - menor[i]);
+                    Double newValor = ((double) Double.parseDouble(data[i]) - menor[i]) / (maior[i] - menor[i]);
                     d.setAtributos(newValor);
                 }
                 d.setClasse(data[data.length - 1]);

@@ -9,6 +9,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.CategoryAxis;
@@ -37,6 +38,7 @@ public class FXMLTrainController implements Initializable {
     
     private RedeNeural net;
     private List<Dados> lTeste;
+    private Thread thread;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -53,7 +55,8 @@ public class FXMLTrainController implements Initializable {
                     return null;
                 } 
             }; 
-            new Thread(exampleTask).start();
+            thread = new Thread(exampleTask);
+            thread.start();
         }
         catch(Exception e) {
             System.out.println(e.getMessage());
@@ -131,5 +134,10 @@ public class FXMLTrainController implements Initializable {
         tableConfusion.setVisible(true);
         lbTrain.setText("Treinamento concluído com sucesso!");
         System.out.println(lbTrain.getText());
+    }
+
+    @FXML
+    private void clkBreakThread(ActionEvent event) {
+        thread.stop();
     }
 }

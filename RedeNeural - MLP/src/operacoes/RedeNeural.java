@@ -148,7 +148,7 @@ public class RedeNeural implements Serializable {
                 erroRede = 0;
                 int index = rotulos.indexOf(d.getClasse());
                 for (int i = 0; i < Lsaida.size(); i++) {
-                    Lsaida.get(i).setErro(mDesejada[index][i] - Lsaida.get(i).getI());
+                    Lsaida.get(i).setErro((double) mDesejada[index][i] - Lsaida.get(i).getI());
                     erroRede += Math.pow(Lsaida.get(i).getErro(), 2);
 
                     if (faOculta.equals("t"))
@@ -183,7 +183,7 @@ public class RedeNeural implements Serializable {
                 //Atualização de pesos da camada oculta
                 for (int i = 0; i < Lco.size(); i++)
                     for (int j = 0; j < d.getAtributos().size(); j++) 
-                        pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getGradiente() * d.getAtributos().get(j);
+                        pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getErro()* d.getAtributos().get(j);
             }
             
             erroRede = erroRede / Ldados.size();
