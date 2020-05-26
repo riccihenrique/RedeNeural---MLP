@@ -155,10 +155,13 @@ public class FXMLMainController implements Initializable {
 
     @FXML
     private void cklTrain(ActionEvent event) {
-        RedeNeural rede = new RedeNeural(lTreino, Double.parseDouble(txtMinError.getText()), 
-                linearHidden.isSelected() ? "li" : tanhHidden.isSelected() ? "t" : "lo",
-                linear.isSelected() ? "li" : tanh.isSelected() ? "t" : "lo", Double.parseDouble(txtLearningRate.getText()), 
-                Integer.parseInt(txtSteps.getText()), Integer.parseInt(txtHiddenLayer.getText()));
+        RedeNeural rede = new RedeNeural(lTreino, 
+                                            Double.parseDouble(txtMinError.getText()), 
+                                            linearHidden.isSelected() ? "li" : tanhHidden.isSelected() ? "t" : "lo",
+                                            linear.isSelected() ? "li" : tanh.isSelected() ? "t" : "lo", 
+                                            Double.parseDouble(txtLearningRate.getText()), 
+                                            Integer.parseInt(txtSteps.getText()), 
+                                            Integer.parseInt(txtHiddenLayer.getText()));
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("FXMLTrain.fxml"));
             Parent root = (Parent) loader.load();

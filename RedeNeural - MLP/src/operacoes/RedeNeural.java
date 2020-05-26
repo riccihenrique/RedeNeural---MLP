@@ -73,10 +73,9 @@ public class RedeNeural implements Serializable {
 
         for (int i = 0; i < getQtSaida(); i++) {
             for (int j = 0; j < getQtSaida(); j++) {
-
                 if (i == j)
                     mDesejada[i][i] = 1;
-                else if (faOculta.equals("t"))
+                else if (faSaida.equals("t"))
                     mDesejada[i][j] = -1;
                 else
                     mDesejada[i][j] = 0;
@@ -101,19 +100,20 @@ public class RedeNeural implements Serializable {
     }
 
     public double hiperbolica(Double net) {
-        return (1.0 - Math.pow(Math.E, -2.0 * net)) / (1.0 + Math.pow(Math.E, -2.0 * net));
+        double d = Math.pow(Math.E, -2.0 * net);
+        return (1.0 - d) / (1.0 + d);
     }
 
     public double Dhiperbolica(Double net) {
-        return 1.0 - net * net;
+        return 1.0 - Math.pow(net, 2);
     }
 
     public void treinar() {
         int epocas = 0;
-        int som_erro = 0;
+        double som_erro;
         while (erro < erroRede && epocas < qtIt) {
-            for (Dados d : Ldados) {
-                som_erro = 0;
+            som_erro = 0;
+            for (Dados d : Ldados) {                
                 for (int i = 0; i < Lco.size(); i++) // Cálculo do NET
                 {
                     double soma = 0;
@@ -151,12 +151,12 @@ public class RedeNeural implements Serializable {
                     Lsaida.get(i).setErro((double) mDesejada[index][i] - Lsaida.get(i).getI());
                     erroRede += Math.pow(Lsaida.get(i).getErro(), 2);
 
-                    if (faOculta.equals("t"))
+                    if (faSaida.equals("t"))
                         Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dhiperbolica(Lsaida.get(i).getI()));
-                    else if (faOculta.equals("lo"))
+                    else if (faSaida.equals("lo"))
                         Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlogistica(Lsaida.get(i).getI()));
                     else 
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlinear(Lsaida.get(i).getNet()));
+                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlinear(Lsaida.get(i).getI()));
                 }
 
                 erroRede /= 2;
@@ -172,7 +172,7 @@ public class RedeNeural implements Serializable {
                     else if (faOculta.equals("lo"))
                         Lco.get(i).setErro(somErro * Dlogistica(Lco.get(i).getI()));
                     else 
-                        Lco.get(i).setErro(somErro * Dlinear(Lco.get(i).getNet()));
+                        Lco.get(i).setErro(somErro * Dlinear(Lco.get(i).getI()));
                 }
 
                 //Atualização de pesos da camada de saida
@@ -186,7 +186,7 @@ public class RedeNeural implements Serializable {
                         pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getErro()* d.getAtributos().get(j);
             }
             
-            erroRede = erroRede / Ldados.size();
+            erroRede = som_erro / Ldados.size();
             System.out.println("Epoca: " + epocas + " Erro:" + erroRede);
             Lerros.add(erroRede);
 
