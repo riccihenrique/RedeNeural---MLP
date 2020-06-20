@@ -73,7 +73,9 @@ public class FXMLTrainController implements Initializable {
         chartLoss.getData().add(series);
         
         for(int i = 0; i < net.getErrors().size(); i += 50)
-            series.getData().add(new XYChart.Data<String, Double>(i + "", net.getErrors().get(i)));
+            if(i % 1000 == 0)
+                series.getData().add(new XYChart.Data<String, Double>(i + "", net.getErrors().get(i)));
+            
     }
 
     public void setNet(RedeNeural net) {

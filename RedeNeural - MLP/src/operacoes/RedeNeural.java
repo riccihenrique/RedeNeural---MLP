@@ -251,6 +251,21 @@ public class RedeNeural implements Serializable {
             
             mConfusao[i][index]++;
         }
+        
+        int c = 0;
+        for(int i = 0; i < getQtSaida(); i++) {
+            for(int j = 0; j < getQtSaida(); j++) {
+                if(i == j)
+                    c += mConfusao[i][j];
+                System.out.print(mConfusao[i][j] + " ");
+            }
+            
+            System.out.println("");
+        }
+        
+        System.out.println("Acertos " + c + " de " + Lteste.size());
+        
+        
         return mConfusao;
     }
 
