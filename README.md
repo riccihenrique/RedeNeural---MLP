@@ -2,11 +2,11 @@
 A multilayer perceptron using java
 
 Projeto desenvolvido para a matéria de Inteligência Artificial. <br>
-O projeto conta com apenas uma camada oculta já pré definida, porém podem ser escolhido a quantidade de neurônios para ela. Por padrão, a quantidade será (NumeroDeAtributos + NumeroDeClasses) / 2 <br>
+O projeto conta com apenas uma camada oculta já pré definida, porém pode ser escolhido a quantidade de neurônios para ela. Por padrão, a quantidade será (NumeroDeAtributos + NumeroDeClasses) / 2 <br>
 <br>
 ![alt text](https://github.com/riccihenrique/RedeNeural---MLP/blob/master/RedeNeural%20-%20MLP/src/arquivos/index.PNG)
 <br>
-As funções de ativação existentes no projeto são a Linear, Logistica e Tangente Hiperbólica, que podem ser aplicadas tanto na camada oculta como na camada de saída. <br>
+As funções de ativação existentes no projeto são a Linear, Logistica e Tangente Hiperbólica, que podem ser aplicadas tanto na camada oculta como na camada de saída. <br> <br>
 Os parametros "Taxa de Aprendizado", "Erro mínimo" e "Épocas" definem, respectivamente, o valor que será usado no cálculo da atualização dos pesos (entre 0 e 1), o valor mínimo do error para o treinamento finalizar e
 a quantidade máxima de épocas que o treinamento irá ser executado. <br>
 
