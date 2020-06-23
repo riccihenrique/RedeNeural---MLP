@@ -5,79 +5,81 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class RedeNeural implements Serializable {
+public final class RedeNeural implements Serializable {
 
-    private List<Dados> Ldados;
-    private List<Neuronio> Lco, Lsaida;
-    private List<Double> Lerros = new ArrayList<>();
+    private final List<Dados> dadosTreino;
+    private List<Neuronio> camadaOculta, camadaSaida;
+    private List<Double> erros = new ArrayList<>();
     private List<String> rotulos;
 
     private double[][] pesosOculta, pesosSaida;
     private int[][] mDesejada;
-    private double erro, erroRede = 10, txA;
-    private String faOculta, faSaida;
-    private int qtIt, qtCo, n_saidas;
+    private final double erro, txAprendizado;
+    private double erroRede = 10;
+    private final String fAtivacaoOculta, fAtivacaoSaida;
+    private final int qtdEpocas, qtdOculta;
+    private int nSaidas;
     private boolean finished = false;
 
-    public RedeNeural(List<Dados> Ldados, double erro, String fao, String fas, double txA, int qtIt, int qtCo) {
-        this.Ldados = Ldados;
+    public RedeNeural(List<Dados> dadosTreino, double erro, String fao, String fas, double txAprendizado, int qtdEpocas, int qtdOculta) {
+        this.dadosTreino = dadosTreino;
         this.erro = erro;
-        this.faOculta = fao;
-        this.faSaida = fas;
-        this.txA = txA;
-        this.qtIt = qtIt;
-        this.qtCo = qtCo;
+        this.fAtivacaoOculta = fao;
+        this.fAtivacaoSaida = fas;
+        this.txAprendizado = txAprendizado;
+        this.qtdEpocas = qtdEpocas;
+        this.qtdOculta = qtdOculta;
         inicializaCamadas();
     }
 
     private int getQtSaida() {
         rotulos = new ArrayList();
 
-        for (int i = 0; i < Ldados.size(); i++)
-            if (!rotulos.contains(Ldados.get(i).getClasse())) 
-                rotulos.add(Ldados.get(i).getClasse());
+        for (int i = 0; i < dadosTreino.size(); i++)
+            if (!rotulos.contains(dadosTreino.get(i).getClasse())) 
+                rotulos.add(dadosTreino.get(i).getClasse());
 
         return rotulos.size();
     }
 
     public void inicializaCO() {
         //init camada oculta
-        Lco = new ArrayList<>();
-        for (int i = 0; i < qtCo; i++)
-            Lco.add(new Neuronio());
+        camadaOculta = new ArrayList<>();
+        for (int i = 0; i < qtdOculta; i++)
+            camadaOculta.add(new Neuronio());
     }
 
     public void inicializaSaida() {
         //init camada de saida
-        Lsaida = new ArrayList<>();
+        camadaSaida = new ArrayList<>();
         for (int i = 0; i < getQtSaida(); i++)
-            Lsaida.add(new Neuronio());
+            camadaSaida.add(new Neuronio());
     }
 
     public void inicializaCamadas() {
         inicializaCO();
         inicializaSaida();
         
-        n_saidas = getQtSaida();
+        nSaidas = getQtSaida();
         
-        pesosOculta = new double[qtCo][Ldados.get(0).getAtributos().size()];
-        pesosSaida = new double[n_saidas][qtCo];
-        mDesejada = new int[n_saidas][n_saidas];
+        pesosOculta = new double[qtdOculta][dadosTreino.get(0).getAtributos().size()];
+        pesosSaida = new double[nSaidas][qtdOculta];
+        mDesejada = new int[nSaidas][nSaidas];
 
         Random rand = new Random();
-        for (int i = 0; i < qtCo; i++)
-            for (int j = 0; j < Ldados.get(0).getAtributos().size(); j++)
+        for (int i = 0; i < qtdOculta; i++)
+            for (int j = 0; j < dadosTreino.get(0).getAtributos().size(); j++)
                 pesosOculta[i][j] = rand.nextInt(5) - 2.0;
 
-        for (int i = 0; i < n_saidas; i++)
-            for (int j = 0; j < qtCo; j++) 
+        for (int i = 0; i < nSaidas; i++)
+            for (int j = 0; j < qtdOculta; j++) 
                 pesosSaida[i][j] = rand.nextInt(5) - 2.0;
 
-        for (int i = 0; i < n_saidas; i++) {
-            for (int j = 0; j < n_saidas; j++) {
+        for (int i = 0; i < nSaidas; i++) {
+            for (int j = 0; j < nSaidas; j++) {
                 if (i == j)
                     mDesejada[i][i] = 1;
-                else if (faSaida.equals("t"))
+                else if (fAtivacaoSaida.equals("t"))
                     mDesejada[i][j] = -1;
                 else
                     mDesejada[i][j] = 0;
@@ -85,113 +87,114 @@ public class RedeNeural implements Serializable {
         }
     }
 
-    public double linear(Double net) {
+    public double linear(double net) {
         return net / 10.0;
     }
 
-    public double Dlinear(Double net) {
+    public double derivadaLinear(double net) {
         return 1.0 / 10.0;
     }
 
-    public double logistica(Double net) {
+    public double logistica(double net) {
         return 1.0 / (1.0 + Math.pow(Math.E, -net));
     }
 
-    public double Dlogistica(Double net) {
+    public double derivadaLogistica(double net) {
         return net * (1.0 - net);
     }
 
-    public double hiperbolica(Double net) {
+    public double hiperbolica(double net) {
         double d = Math.pow(Math.E, -2.0 * net);
         return (1.0 - d) / (1.0 + d);
     }
 
-    public double Dhiperbolica(Double net) {
+    public double derivadaHiperbolica(double net) {
         return 1.0 - Math.pow(net, 2);
     }
 
     public void treinar() {
         int epocas = 0;
+        erros= new ArrayList<>();
         finished = false;
         double som_erro;
-        while (erro < erroRede && epocas < qtIt) {
+        while (erro < erroRede && epocas < qtdEpocas) {
             som_erro = 0;
-            for (Dados d : Ldados) {                
-                for (int i = 0; i < Lco.size(); i++) { // Cálculo do NET camada oculta
+            for (Dados d : dadosTreino) {                
+                for (int i = 0; i < camadaOculta.size(); i++) { // Cálculo do NET camada oculta
                     double soma = 0;
                     for (int j = 0; j < d.getAtributos().size(); j++)
                         soma += d.getAtributos().get(j) * pesosOculta[i][j];
                         
-                    Lco.get(i).setNet(soma);
+                    camadaOculta.get(i).setNet(soma);
 
-                    if (faOculta.equals("t")) //tg hiperbolica                    
-                        Lco.get(i).setI(hiperbolica(Lco.get(i).getNet()));
-                    else if (faOculta.equals("lo"))
-                        Lco.get(i).setI(logistica(Lco.get(i).getNet()));
+                    if (fAtivacaoOculta.equals("t")) //tg hiperbolica                    
+                        camadaOculta.get(i).setI(hiperbolica(camadaOculta.get(i).getNet()));
+                    else if (fAtivacaoOculta.equals("lo"))
+                        camadaOculta.get(i).setI(logistica(camadaOculta.get(i).getNet()));
                     else 
-                        Lco.get(i).setI(linear(Lco.get(i).getNet()));
+                        camadaOculta.get(i).setI(linear(camadaOculta.get(i).getNet()));
                 }
 
-                for (int i = 0; i < Lsaida.size(); i++) { // Cálculo do NET camada saída
+                for (int i = 0; i < camadaSaida.size(); i++) { // Cálculo do NET camada saída
                     double soma = 0;
-                    for (int j = 0; j < Lco.size(); j++)
-                        soma += Lco.get(j).getI() * pesosSaida[i][j];
+                    for (int j = 0; j < camadaOculta.size(); j++)
+                        soma += camadaOculta.get(j).getI() * pesosSaida[i][j];
                     
-                    Lsaida.get(i).setNet(soma);
+                    camadaSaida.get(i).setNet(soma);
 
-                    if (faSaida.equals("t")) //tg hiperbolica
-                        Lsaida.get(i).setI(hiperbolica(Lsaida.get(i).getNet()));
-                    else if (faSaida.equals("lo"))
-                        Lsaida.get(i).setI(logistica(Lsaida.get(i).getNet()));
+                    if (fAtivacaoSaida.equals("t")) //tg hiperbolica
+                        camadaSaida.get(i).setI(hiperbolica(camadaSaida.get(i).getNet()));
+                    else if (fAtivacaoSaida.equals("lo"))
+                        camadaSaida.get(i).setI(logistica(camadaSaida.get(i).getNet()));
                     else 
-                        Lsaida.get(i).setI(linear(Lsaida.get(i).getNet()));                    
+                        camadaSaida.get(i).setI(linear(camadaSaida.get(i).getNet()));                    
                 }
                 
                 // Calculo do erro da camada de saida
                 erroRede = 0;
                 int index = rotulos.indexOf(d.getClasse());
-                for (int i = 0; i < Lsaida.size(); i++) {
-                    Lsaida.get(i).setErro((double) mDesejada[index][i] - Lsaida.get(i).getI());
-                    erroRede += Math.pow(Lsaida.get(i).getErro(), 2);
+                for (int i = 0; i < camadaSaida.size(); i++) {
+                    camadaSaida.get(i).setErro((double) mDesejada[index][i] - camadaSaida.get(i).getI());
+                    erroRede += Math.pow(camadaSaida.get(i).getErro(), 2);
 
-                    if (faSaida.equals("t"))
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dhiperbolica(Lsaida.get(i).getI()));
-                    else if (faSaida.equals("lo"))
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlogistica(Lsaida.get(i).getI()));
+                    if (fAtivacaoSaida.equals("t"))
+                        camadaSaida.get(i).setGradiente(camadaSaida.get(i).getErro() * derivadaHiperbolica(camadaSaida.get(i).getI()));
+                    else if (fAtivacaoSaida.equals("lo"))
+                        camadaSaida.get(i).setGradiente(camadaSaida.get(i).getErro() * derivadaLogistica(camadaSaida.get(i).getI()));
                     else 
-                        Lsaida.get(i).setGradiente(Lsaida.get(i).getErro() * Dlinear(Lsaida.get(i).getI()));
+                        camadaSaida.get(i).setGradiente(camadaSaida.get(i).getErro() * derivadaLinear(camadaSaida.get(i).getI()));
                 }
 
                 erroRede /= 2;
                 som_erro += erroRede;
                 // calculo do erro da camada oculta               
-                for (int i = 0; i < Lco.size(); i++) {
+                for (int i = 0; i < camadaOculta.size(); i++) {
                     double somErro = 0;
-                    for (int j = 0; j < Lsaida.size(); j++) 
-                        somErro += Lsaida.get(j).getGradiente() * pesosSaida[j][i];
+                    for (int j = 0; j < camadaSaida.size(); j++) 
+                        somErro += camadaSaida.get(j).getGradiente() * pesosSaida[j][i];
                     
-                    if (faOculta.equals("t"))
-                        Lco.get(i).setGradiente(somErro * Dhiperbolica(Lco.get(i).getI()));
-                    else if (faOculta.equals("lo"))
-                        Lco.get(i).setGradiente(somErro * Dlogistica(Lco.get(i).getI()));
+                    if (fAtivacaoOculta.equals("t"))
+                        camadaOculta.get(i).setGradiente(somErro * derivadaHiperbolica(camadaOculta.get(i).getI()));
+                    else if (fAtivacaoOculta.equals("lo"))
+                        camadaOculta.get(i).setGradiente(somErro * derivadaLogistica(camadaOculta.get(i).getI()));
                     else 
-                        Lco.get(i).setGradiente(somErro * Dlinear(Lco.get(i).getI()));
+                        camadaOculta.get(i).setGradiente(somErro * derivadaLinear(camadaOculta.get(i).getI()));
                 }
 
                 //Atualização de pesos da camada de saida
-                for (int i = 0; i < Lsaida.size(); i++)
-                    for (int j = 0; j < Lco.size(); j++)
-                        pesosSaida[i][j] = pesosSaida[i][j] + txA * Lsaida.get(i).getGradiente() * Lco.get(j).getI();
+                for (int i = 0; i < camadaSaida.size(); i++)
+                    for (int j = 0; j < camadaOculta.size(); j++)
+                        pesosSaida[i][j] = pesosSaida[i][j] + txAprendizado * camadaSaida.get(i).getGradiente() * camadaOculta.get(j).getI();
 
                 //Atualização de pesos da camada oculta
-                for (int i = 0; i < Lco.size(); i++)
+                for (int i = 0; i < camadaOculta.size(); i++)
                     for (int j = 0; j < d.getAtributos().size(); j++) 
-                        pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getGradiente()* d.getAtributos().get(j);
+                        pesosOculta[i][j] = pesosOculta[i][j] + txAprendizado * camadaOculta.get(i).getGradiente()* d.getAtributos().get(j);
             }
             
-            erroRede = som_erro / Ldados.size();
+            erroRede = som_erro / dadosTreino.size();
             //System.out.println("Epoca: " + epocas + " Erro:" + erroRede);
-            Lerros.add(erroRede);
+            erros.add(erroRede);
 
             if (erroRede < erro)
                 break;
@@ -201,46 +204,46 @@ public class RedeNeural implements Serializable {
         this.finished = true;
     }
 
-    public int[][] teste(List<Dados> Lteste) {        
+    public int[][] teste(List<Dados> dadosTeste) {        
         int [][] mConfusao = new int[getQtSaida()][getQtSaida()];
         
-        for (Dados d : Lteste) {
-            for (int i = 0; i < Lco.size(); i++) { // Cálculo do NET            
+        for (Dados d : dadosTeste) {
+            for (int i = 0; i < camadaOculta.size(); i++) { // Cálculo do NET            
                 double soma = 0;
                 for (int j = 0; j < d.getAtributos().size(); j++)
                     soma += d.getAtributos().get(j) * pesosOculta[i][j];
                 
-                Lco.get(i).setNet(soma);
+                camadaOculta.get(i).setNet(soma);
 
-                if (faOculta.equals("t")) //tg hiperbolica                
-                    Lco.get(i).setI(hiperbolica(Lco.get(i).getNet()));
-                else if (faOculta.equals("lo"))
-                    Lco.get(i).setI(logistica(Lco.get(i).getNet()));
+                if (fAtivacaoOculta.equals("t")) //tg hiperbolica                
+                    camadaOculta.get(i).setI(hiperbolica(camadaOculta.get(i).getNet()));
+                else if (fAtivacaoOculta.equals("lo"))
+                    camadaOculta.get(i).setI(logistica(camadaOculta.get(i).getNet()));
                 else 
-                    Lco.get(i).setI(linear(Lco.get(i).getNet()));
+                    camadaOculta.get(i).setI(linear(camadaOculta.get(i).getNet()));
             }
 
-            for (int i = 0; i < Lsaida.size(); i++) {
+            for (int i = 0; i < camadaSaida.size(); i++) {
                 double soma = 0;
-                for (int j = 0; j < Lco.size(); j++) 
-                    soma += Lco.get(j).getI() * pesosSaida[i][j];
+                for (int j = 0; j < camadaOculta.size(); j++) 
+                    soma += camadaOculta.get(j).getI() * pesosSaida[i][j];
                 
-                Lsaida.get(i).setNet(soma);
+                camadaSaida.get(i).setNet(soma);
 
-                if (faSaida.equals("t")) //tg hiperbolica
-                    Lsaida.get(i).setI(hiperbolica(Lsaida.get(i).getNet()));
-                else if (faSaida.equals("lo"))
-                    Lsaida.get(i).setI(logistica(Lsaida.get(i).getNet()));
+                if (fAtivacaoSaida.equals("t")) //tg hiperbolica
+                    camadaSaida.get(i).setI(hiperbolica(camadaSaida.get(i).getNet()));
+                else if (fAtivacaoSaida.equals("lo"))
+                    camadaSaida.get(i).setI(logistica(camadaSaida.get(i).getNet()));
                 else
-                    Lsaida.get(i).setI(linear(Lsaida.get(i).getNet()));
+                    camadaSaida.get(i).setI(linear(camadaSaida.get(i).getNet()));
             }
 
             int index = 0;
-            double maior = Lsaida.get(0).getI();
+            double maior = camadaSaida.get(0).getI();
 
-            for (int i = 1; i < Lsaida.size(); i++)  // Verifica qual é o neoronio de maior valor e pega o indice dele              
-                if (Lsaida.get(i).getI() > maior) {
-                    maior = Lsaida.get(i).getI();
+            for (int i = 1; i < camadaSaida.size(); i++)  // Verifica qual é o neoronio de maior valor e pega o indice dele              
+                if (camadaSaida.get(i).getI() > maior) {
+                    maior = camadaSaida.get(i).getI();
                     index = i;
                 }
             
@@ -259,7 +262,7 @@ public class RedeNeural implements Serializable {
             System.out.println("");
         }
         
-        System.out.println("Acertos " + c + " de " + Lteste.size());
+        System.out.println("Acertos " + c + " de " + dadosTeste.size());
         
         return mConfusao;
     }
@@ -269,18 +272,14 @@ public class RedeNeural implements Serializable {
     }
 
     public List<Double> getErrors() {
-        return this.Lerros;
+        return this.erros;
     }
 
     public List<String> getRotulos() {
         return rotulos;
     }
-
-    public void clearErrors() {
-        Lerros.clear();        
-    }
     
     public int getEpocas() {
-        return this.qtIt;
+        return this.qtdEpocas;
     }
 }
