@@ -3,6 +3,7 @@ package redeneural.mlp;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledExecutorService;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -39,6 +40,7 @@ public class FXMLTrainController implements Initializable {
     private RedeNeural net;
     private List<Dados> lTeste;
     private Thread thread;
+    private ScheduledExecutorService scheduledExecutorService;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -47,16 +49,23 @@ public class FXMLTrainController implements Initializable {
                 @Override protected Void call() throws Exception { // Demais códigos... 
                     Platform.runLater(new Runnable() { 
                         @Override public void run() { // Alteração de componentes 
-                            net.treinar();
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    net.treinar();
+                                }
+                            }).start();
+                            
                             clkChart();
                             showConfusion(net.teste(lTeste));
                         } 
                     }); 
                     return null;
                 } 
-            }; 
+            };            
             thread = new Thread(exampleTask);
             thread.start();
+            scheduledExecutorService.shutdownNow();
         }
         catch(Exception e) {
             System.out.println(e.getMessage());
@@ -69,13 +78,22 @@ public class FXMLTrainController implements Initializable {
         
         XYChart.Series<String, Double> series = new XYChart.Series<>();
         series.setName("Data Series");
-
         chartLoss.getData().add(series);
         
-        for(int i = 0; i < net.getErrors().size(); i += 50)
-            if(i % 1000 == 0)
-                series.getData().add(new XYChart.Data<String, Double>(i + "", net.getErrors().get(i)));
+        int inc = net.getEpocas() / 100;
+        int i = 0;
+        while(!net.isFinished()) {
+            try {
+                Thread.sleep(100);
+            }
+            catch(Exception e) {
+                
+            }
             
+            int qtd = net.getErrors().size();
+            for(; i < qtd; i += inc)
+                series.getData().add(new XYChart.Data<String, Double>(i + " ", net.getErrors().get(i)));
+        }
     }
 
     public void setNet(RedeNeural net) {

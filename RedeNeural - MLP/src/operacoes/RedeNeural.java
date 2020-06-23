@@ -10,13 +10,13 @@ public class RedeNeural implements Serializable {
     private List<Dados> Ldados;
     private List<Neuronio> Lco, Lsaida;
     private List<Double> Lerros = new ArrayList<>();
+    private List<String> rotulos;
 
     private double[][] pesosOculta, pesosSaida;
     private int[][] mDesejada;
     private double erro, erroRede = 10, txA;
     private String faOculta, faSaida;
-    private int qtIt, qtCo;
-    private List<String> rotulos;
+    private int qtIt, qtCo, n_saidas;
     private boolean finished = false;
 
     public RedeNeural(List<Dados> Ldados, double erro, String fao, String fas, double txA, int qtIt, int qtCo) {
@@ -57,22 +57,24 @@ public class RedeNeural implements Serializable {
     public void inicializaCamadas() {
         inicializaCO();
         inicializaSaida();
-
+        
+        n_saidas = getQtSaida();
+        
         pesosOculta = new double[qtCo][Ldados.get(0).getAtributos().size()];
-        pesosSaida = new double[getQtSaida()][qtCo];
-        mDesejada = new int[getQtSaida()][getQtSaida()];
+        pesosSaida = new double[n_saidas][qtCo];
+        mDesejada = new int[n_saidas][n_saidas];
 
         Random rand = new Random();
         for (int i = 0; i < qtCo; i++)
             for (int j = 0; j < Ldados.get(0).getAtributos().size(); j++)
                 pesosOculta[i][j] = rand.nextInt(5) - 2.0;
 
-        for (int i = 0; i < getQtSaida(); i++)
+        for (int i = 0; i < n_saidas; i++)
             for (int j = 0; j < qtCo; j++) 
                 pesosSaida[i][j] = rand.nextInt(5) - 2.0;
 
-        for (int i = 0; i < getQtSaida(); i++) {
-            for (int j = 0; j < getQtSaida(); j++) {
+        for (int i = 0; i < n_saidas; i++) {
+            for (int j = 0; j < n_saidas; j++) {
                 if (i == j)
                     mDesejada[i][i] = 1;
                 else if (faSaida.equals("t"))
@@ -110,12 +112,12 @@ public class RedeNeural implements Serializable {
 
     public void treinar() {
         int epocas = 0;
+        finished = false;
         double som_erro;
         while (erro < erroRede && epocas < qtIt) {
             som_erro = 0;
             for (Dados d : Ldados) {                
-                for (int i = 0; i < Lco.size(); i++) // Cálculo do NET
-                {
+                for (int i = 0; i < Lco.size(); i++) { // Cálculo do NET camada oculta
                     double soma = 0;
                     for (int j = 0; j < d.getAtributos().size(); j++)
                         soma += d.getAtributos().get(j) * pesosOculta[i][j];
@@ -130,7 +132,7 @@ public class RedeNeural implements Serializable {
                         Lco.get(i).setI(linear(Lco.get(i).getNet()));
                 }
 
-                for (int i = 0; i < Lsaida.size(); i++) {
+                for (int i = 0; i < Lsaida.size(); i++) { // Cálculo do NET camada saída
                     double soma = 0;
                     for (int j = 0; j < Lco.size(); j++)
                         soma += Lco.get(j).getI() * pesosSaida[i][j];
@@ -144,7 +146,8 @@ public class RedeNeural implements Serializable {
                     else 
                         Lsaida.get(i).setI(linear(Lsaida.get(i).getNet()));                    
                 }
-
+                
+                // Calculo do erro da camada de saida
                 erroRede = 0;
                 int index = rotulos.indexOf(d.getClasse());
                 for (int i = 0; i < Lsaida.size(); i++) {
@@ -161,18 +164,18 @@ public class RedeNeural implements Serializable {
 
                 erroRede /= 2;
                 som_erro += erroRede;
-
+                // calculo do erro da camada oculta               
                 for (int i = 0; i < Lco.size(); i++) {
                     double somErro = 0;
                     for (int j = 0; j < Lsaida.size(); j++) 
                         somErro += Lsaida.get(j).getGradiente() * pesosSaida[j][i];
                     
                     if (faOculta.equals("t"))
-                        Lco.get(i).setErro(somErro * Dhiperbolica(Lco.get(i).getI()));
+                        Lco.get(i).setGradiente(somErro * Dhiperbolica(Lco.get(i).getI()));
                     else if (faOculta.equals("lo"))
-                        Lco.get(i).setErro(somErro * Dlogistica(Lco.get(i).getI()));
+                        Lco.get(i).setGradiente(somErro * Dlogistica(Lco.get(i).getI()));
                     else 
-                        Lco.get(i).setErro(somErro * Dlinear(Lco.get(i).getI()));
+                        Lco.get(i).setGradiente(somErro * Dlinear(Lco.get(i).getI()));
                 }
 
                 //Atualização de pesos da camada de saida
@@ -183,11 +186,11 @@ public class RedeNeural implements Serializable {
                 //Atualização de pesos da camada oculta
                 for (int i = 0; i < Lco.size(); i++)
                     for (int j = 0; j < d.getAtributos().size(); j++) 
-                        pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getErro()* d.getAtributos().get(j);
+                        pesosOculta[i][j] = pesosOculta[i][j] + txA * Lco.get(i).getGradiente()* d.getAtributos().get(j);
             }
             
             erroRede = som_erro / Ldados.size();
-            System.out.println("Epoca: " + epocas + " Erro:" + erroRede);
+            //System.out.println("Epoca: " + epocas + " Erro:" + erroRede);
             Lerros.add(erroRede);
 
             if (erroRede < erro)
@@ -198,13 +201,11 @@ public class RedeNeural implements Serializable {
         this.finished = true;
     }
 
-    public int[][] teste(List<Dados> Lteste) {
-        
+    public int[][] teste(List<Dados> Lteste) {        
         int [][] mConfusao = new int[getQtSaida()][getQtSaida()];
-        int cA = 0, tot = 0;
+        
         for (Dados d : Lteste) {
-            for (int i = 0; i < Lco.size(); i++) // Cálculo do NET
-            {
+            for (int i = 0; i < Lco.size(); i++) { // Cálculo do NET            
                 double soma = 0;
                 for (int j = 0; j < d.getAtributos().size(); j++)
                     soma += d.getAtributos().get(j) * pesosOculta[i][j];
@@ -237,18 +238,13 @@ public class RedeNeural implements Serializable {
             int index = 0;
             double maior = Lsaida.get(0).getI();
 
-            for (int i = 1; i < Lsaida.size(); i++)                
+            for (int i = 1; i < Lsaida.size(); i++)  // Verifica qual é o neoronio de maior valor e pega o indice dele              
                 if (Lsaida.get(i).getI() > maior) {
                     maior = Lsaida.get(i).getI();
                     index = i;
                 }
             
-            int i = 0;
-            for (; i < rotulos.size(); i++) {
-                if(rotulos.get(i).equals(d.getClasse()))
-                    break;
-            }
-            
+            int i = rotulos.indexOf(d.getClasse());            
             mConfusao[i][index]++;
         }
         
@@ -265,7 +261,6 @@ public class RedeNeural implements Serializable {
         
         System.out.println("Acertos " + c + " de " + Lteste.size());
         
-        
         return mConfusao;
     }
 
@@ -277,8 +272,15 @@ public class RedeNeural implements Serializable {
         return this.Lerros;
     }
 
-    public List<String> getRotulos()
-    {
+    public List<String> getRotulos() {
         return rotulos;
+    }
+
+    public void clearErrors() {
+        Lerros.clear();        
+    }
+    
+    public int getEpocas() {
+        return this.qtIt;
     }
 }
