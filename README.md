@@ -1,4 +1,4 @@
-# RedeNeural---MLP
+# RedeNeural MLP
 A multilayer perceptron using java
 
 Projeto desenvolvido para a matéria de Inteligência Artificial. <br>
